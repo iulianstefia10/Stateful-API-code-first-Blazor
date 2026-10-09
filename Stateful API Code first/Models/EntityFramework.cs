@@ -120,5 +120,15 @@ namespace APIfilms.Models.EntityFramework
 
 
     }
+    public class Serie
+    {
+        public int SerieId { get; set; }
+        public string Title { get; set; } = null!;
+        public string? Resume { get; set; }
+        public int? NbSaisons { get; set; }
+        public int? NbEpisodes { get; set; }
+        public int? CreationYear { get; set; }
+        public string? Network { get; set; }
+    }
 
 }

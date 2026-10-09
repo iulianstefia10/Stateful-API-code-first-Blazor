@@ -86,6 +86,38 @@ namespace Stateful_API_Code_first.Migrations
                         });
                 });
 
+            modelBuilder.Entity("APIfilms.Models.EntityFramework.Serie", b =>
+                {
+                    b.Property<int>("SerieId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SerieId"));
+
+                    b.Property<int?>("CreationYear")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("NbEpisodes")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("NbSaisons")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Network")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Resume")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("SerieId");
+
+                    b.ToTable("Series");
+                });
+
             modelBuilder.Entity("APIfilms.Models.EntityFramework.User", b =>
                 {
                     b.Property<int>("UserId")
