@@ -17,7 +17,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor", policy =>
+        policy.WithOrigins("https://localhost:7291", "http://localhost:7291")
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowBlazor");
 
 if (app.Environment.IsDevelopment())
 {

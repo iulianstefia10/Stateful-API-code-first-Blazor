@@ -1,70 +1,80 @@
-﻿using ClientBlazorSeries.Models.DTO;
-using ClientBlazorSeries.Pages;
-using ClientBlazorSeries.Services;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
+using ClientBlazorSeries.Models.DTO;
+using ClientBlazorSeries.Services;
 
-namespace ClientBlazorSeries.ViewModels;
-
-public partial class SeriesViewModel : ObservableObject
+namespace ClientBlazorSeries.ViewModels
 {
-    private readonly ISerieService _serieService;
-
-    [ObservableProperty]
-    private ObservableCollection<SerieDto> _series = new();
-
-    [ObservableProperty]
-    private string? _errorMessage;
-
-    public SeriesViewModel(ISerieService serieService)
+    public partial class SeriesViewModel : ObservableObject
     {
-        _serieService = serieService;
-    }
+        private readonly ISerieService _serieService;
 
-    [RelayCommand]
-    private async Task LoadSeriesAsync(CancellationToken cancellationToken)
-    {
-        try
+        [ObservableProperty]
+        private ObservableCollection<SerieDto> _series = new();
+
+        [ObservableProperty]
+        private string? _statusMessage;
+
+        [ObservableProperty]
+        private string? _errorMessage;
+
+        public SeriesViewModel(ISerieService serieService)
         {
-            ErrorMessage = null;
-            var data = await _serieService.GetSeriesAsync(cancellationToken);
-            if (data != null)
+            _serieService = serieService;
+        }
+
+       
+        [RelayCommand]
+        private async Task LoadSeriesAsync(CancellationToken cancellationToken)
+        {
+            try
             {
+                ErrorMessage = null;
+                StatusMessage = "Chargement des séries en cours...";
+
+                var data = await _serieService.GetSeriesAsync(cancellationToken);
                 Series = new ObservableCollection<SerieDto>(data);
+
+                StatusMessage = $"{Series.Count} séries chargées.";
+            }
+            catch (OperationCanceledException)
+            {
+                StatusMessage = "Le chargement a été annulé par l'utilisateur.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Erreur lors du chargement : {ex.Message}";
+                StatusMessage = null;
             }
         }
-        catch (OperationCanceledException)
-        {
-            ErrorMessage = "Le chargement a été annulé par l'utilisateur.";
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Erreur lors du chargement : {ex.Message}";
-        }
-    }
 
-    [RelayCommand]
-    private async Task LoadSeriesSlowAsync(CancellationToken cancellationToken)
-    {
-        try
+        
+        [RelayCommand]
+        private async Task LoadSeriesSlowAsync(CancellationToken cancellationToken)
         {
-            ErrorMessage = null;
-            // Simulation d'une latence réseau
-            await Task.Delay(4000, cancellationToken);
-            var data = await _serieService.GetSeriesAsync(cancellationToken);
-            if (data != null)
+            try
             {
+                ErrorMessage = null;
+                StatusMessage = "Chargement lent en cours (simulation réseau lent)...";
+
+               
+                await Task.Delay(4000, cancellationToken);
+
+                var data = await _serieService.GetSeriesAsync(cancellationToken);
                 Series = new ObservableCollection<SerieDto>(data);
+
+                StatusMessage = $"{Series.Count} séries chargées (mode lent).";
             }
-        }
-        catch (OperationCanceledException)
-        {
-            ErrorMessage = "Le chargement simulé lent a été annulé.";
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Erreur lors du chargement : {ex.Message}";
+            catch (OperationCanceledException)
+            {
+                StatusMessage = "Le chargement lent a été annulé par l'utilisateur.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Erreur lors du chargement : {ex.Message}";
+                StatusMessage = null;
+            }
         }
     }
 }

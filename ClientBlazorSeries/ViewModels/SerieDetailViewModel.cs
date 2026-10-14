@@ -3,71 +3,97 @@ using CommunityToolkit.Mvvm.Input;
 using ClientBlazorSeries.Models.DTO;
 using ClientBlazorSeries.Services;
 
-namespace ClientBlazorSeries.ViewModels;
-
-public partial class SerieDetailViewModel : ObservableObject
+namespace ClientBlazorSeries.ViewModels
 {
-    private readonly ISerieService _serieService;
-
-    [ObservableProperty]
-    private SerieDetailDto? _serie;
-
-    [ObservableProperty]
-    private string? _statusMessage;
-
-    [ObservableProperty]
-    private bool _isSuccess;
-
-    public SerieDetailViewModel(ISerieService serieService)
+    public partial class SerieDetailViewModel : ObservableObject
     {
-        _serieService = serieService;
-    }
+        private readonly ISerieService _serieService;
 
-    [RelayCommand]
-    public async Task LoadDetailAsync(int id, CancellationToken cancellationToken)
-    {
-        try
-        {
-            StatusMessage = null;
-            Serie = await _serieService.GetSerieByIdAsync(id, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            StatusMessage = "Chargement des détails annulé.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Erreur lors du chargement : {ex.Message}";
-        }
-    }
+        [ObservableProperty]
+        private SerieDetailDto? _serie;
 
-    [RelayCommand]
-    private async Task SaveAsync(CancellationToken cancellationToken)
-    {
-        if (Serie == null) return;
+        [ObservableProperty]
+        private string? _statusMessage;
 
-        try
+        [ObservableProperty]
+        private string? _errorMessage;
+
+        
+        [ObservableProperty]
+        private bool _isSuccess;
+
+        public SerieDetailViewModel(ISerieService serieService)
         {
-            StatusMessage = null;
-            IsSuccess = false;
-            bool success = await _serieService.UpdateSerieAsync(Serie.SerieId, Serie, cancellationToken);
-            if (success)
+            _serieService = serieService;
+        }
+
+        
+        [RelayCommand]
+        private async Task LoadDetailAsync(int id, CancellationToken cancellationToken)
+        {
+            try
             {
-                IsSuccess = true;
-                StatusMessage = "Série mise à jour avec succès.";
+                IsSuccess = false;
+                ErrorMessage = null;
+                StatusMessage = "Chargement des détails...";
+                Serie = await _serieService.GetSerieByIdAsync(id, cancellationToken);
+                StatusMessage = null;
             }
-            else
+            catch (OperationCanceledException)
             {
-                StatusMessage = "La mise à jour a échoué sur le serveur.";
+                StatusMessage = "Chargement des détails annulé.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Erreur : {ex.Message}";
+                StatusMessage = null;
             }
         }
-        catch (OperationCanceledException)
+
+        
+        [RelayCommand]
+        private async Task LoadSerieAsync(int id, CancellationToken cancellationToken)
         {
-            StatusMessage = "La sauvegarde a été annulée.";
+            await LoadDetailAsync(id, cancellationToken);
         }
-        catch (Exception ex)
+
+      
+        [RelayCommand]
+        private async Task SaveAsync(CancellationToken cancellationToken)
         {
-            StatusMessage = $"Erreur de sauvegarde : {ex.Message}";
+            if (Serie == null) return;
+
+            try
+            {
+                IsSuccess = false;
+                ErrorMessage = null;
+                StatusMessage = "Enregistrement des modifications...";
+
+                await Task.Delay(1500, cancellationToken);
+
+             
+                var success = await _serieService.UpdateSerieAsync(Serie.SerieId, Serie, cancellationToken);
+                if (success)
+                {
+                    IsSuccess = true;
+                    StatusMessage = "Série mise à jour avec succès !";
+                }
+                else
+                {
+                    IsSuccess = false;
+                    ErrorMessage = "Échec de la mise à jour de la série.";
+                    StatusMessage = null;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                StatusMessage = "La sauvegarde a été annulée.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Erreur lors de la sauvegarde : {ex.Message}";
+                StatusMessage = null;
+            }
         }
     }
 }

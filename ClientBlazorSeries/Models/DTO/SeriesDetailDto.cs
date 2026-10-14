@@ -1,33 +1,33 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace ClientBlazorSeries.Models.DTO;
-
-public class SerieDetailDto
+namespace ClientBlazorSeries.Models.DTO
 {
-    public int SerieId { get; set; }
+    public class SerieDetailDto
+    {
+        public int SerieId { get; set; }
 
-    [Required(ErrorMessage = "Le titre est obligatoire.")]
-    [StringLength(100, ErrorMessage = "Le titre ne peut pas dépasser 100 caractères.")]
-    public string Titre { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Le titre de la série est obligatoire.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Le titre doit contenir entre 2 et 100 caractères.")]
+        [JsonPropertyName("titre")]
+        public string Titre { get; set; } = string.Empty;
 
-    public string? Resume { get; set; }
+        [Required(ErrorMessage = "Le résumé est obligatoire.")]
+        public string Summary { get; set; } = string.Empty;
 
-    [Range(1, 100, ErrorMessage = "Le nombre de saisons doit être compris entre 1 et 100.")]
-    public int? NbSaisons { get; set; }
+        [Range(1, 100, ErrorMessage = "Le nombre de saisons doit être compris entre 1 et 100.")]
+        public int Seasons { get; set; }
 
-    [Range(1, 5000, ErrorMessage = "Le nombre d'épisodes doit être valide.")]
-    public int? NbEpisodes { get; set; }
+        [Range(1, 5000, ErrorMessage = "Le nombre d'épisodes doit être supérieur à 0.")]
+        public int Episodes { get; set; }
 
-    [Range(1900, 2100, ErrorMessage = "L'année de création doit être une année valide.")]
-    public int? AnneeCreation { get; set; }
+        [Range(1900, 2100, ErrorMessage = "L'année de création doit être valide (entre 1900 et 2100).")]
+        public int CreationYear { get; set; }
 
-    public string? Network { get; set; }
+        public bool IsInProgress { get; set; }
 
-    // Champs calculés demandés par le sujet
-    public double AverageEpisodesPerSeason =>
-        (NbSaisons.HasValue && NbSaisons.Value > 0 && NbEpisodes.HasValue)
-            ? Math.Round((double)NbEpisodes.Value / NbSaisons.Value, 1)
-            : 0;
+        public double AverageEpisodesPerSeason => Seasons > 0 ? Math.Round((double)Episodes / Seasons, 1) : 0;
 
-    public bool IsInProgress { get; set; }
+        public string? NetworkName { get; set; }
+    }
 }
